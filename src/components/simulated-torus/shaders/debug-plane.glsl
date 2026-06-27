@@ -1,19 +1,21 @@
-#define GPGPU_DEBUG_PLANE_COLOR vec3(0.7, 0.4, 0.1)
+#include "../../../shared/shaders/simplex-noise-4d.glsl"
+
+uniform float uTime;
 
 void main(){
 
-    vec3 rgb = GPGPU_DEBUG_PLANE_COLOR;
-
     vec2 uv = gl_FragCoord.xy / resolution.xy;
-
     vec4 particlesTexture = texture(uParticles, uv);
-    float mult = 1.0;
-    if(particlesTexture.y > 2.0) {
-        particlesTexture.y = 0.0;
-    }
 
-    particlesTexture.y += 0.01 * mult;
+    float time = uTime * 0.2;
 
+    vec3 noisedCoords = vec3(
+        simplexNoise4d(vec4(particlesTexture.xyz + 0.0, time)),
+        simplexNoise4d(vec4(particlesTexture.xyz + 1.0, time)),
+        simplexNoise4d(vec4(particlesTexture.xyz + 2.0, time))
+    );
+
+    particlesTexture.xyz += normalize(noisedCoords) * 0.01;
     gl_FragColor = vec4(particlesTexture);
 
 }

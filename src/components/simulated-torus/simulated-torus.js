@@ -20,7 +20,7 @@ import computingPlaneShader from "./shaders/debug-plane.glsl";
 import { GPUComputationRenderer } from "three/addons/misc/GPUComputationRenderer.js";
 
 export const initSimulatedTorus = (scene, renderer, options) => {
-  const torusGeometry = new TorusKnotGeometry();
+  const torusGeometry = new TorusKnotGeometry(4, 1, 2048);
   const torusMaterial = new ShaderMaterial({
     vertexShader,
     fragmentShader,
@@ -92,7 +92,7 @@ export const initSimulatedTorus = (scene, renderer, options) => {
     particlesTexture.image.data[i4 + 0] = particlePositions[i3 + 0];
     particlesTexture.image.data[i4 + 1] = particlePositions[i3 + 1];
     particlesTexture.image.data[i4 + 2] = particlePositions[i3 + 2];
-    particlesTexture.image.data[i4 + 3] = 0;
+    particlesTexture.image.data[i4 + 3] = Math.random();
   }
 
   const particlesVariable = gpgpuRenderer.addVariable(
@@ -100,6 +100,7 @@ export const initSimulatedTorus = (scene, renderer, options) => {
     computingPlaneShader,
     particlesTexture,
   );
+  particlesVariable.material.uniforms.uTime = new Uniform(0);
   gpgpuRenderer.setVariableDependencies(particlesVariable, [particlesVariable]);
 
   gpgpuRenderer.init();
@@ -113,6 +114,8 @@ export const initSimulatedTorus = (scene, renderer, options) => {
 
   tick.addTickCallback((elapsedTime, delta) => {
     gpgpuRenderer.compute();
+
+    particlesVariable.material.uniforms.uTime.value++;
 
     torusMaterial.uniforms.uParticlesTexture.value =
       gpgpuRenderer.getCurrentRenderTarget(particlesVariable).texture;
