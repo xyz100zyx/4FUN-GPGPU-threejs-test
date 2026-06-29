@@ -15,7 +15,7 @@ void main(){
         simplexNoise4d(vec4(particlesTexture.xyz + 2.0, time))
     );
 
-    particlesTexture.xyz += normalize(noisedCoords) * 0.01;
+    particlesTexture.xyz += normalize(noisedCoords) * 0.015;
     gl_FragColor = vec4(particlesTexture);
 
 }

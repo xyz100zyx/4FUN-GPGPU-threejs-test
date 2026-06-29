@@ -20,7 +20,7 @@ import computingPlaneShader from "./shaders/debug-plane.glsl";
 import { GPUComputationRenderer } from "three/addons/misc/GPUComputationRenderer.js";
 
 export const initSimulatedTorus = (scene, renderer, options) => {
-  const torusGeometry = new TorusKnotGeometry(4, 1, 2048);
+  const torusGeometry = new TorusKnotGeometry(4, 1, 4096);
   const torusMaterial = new ShaderMaterial({
     vertexShader,
     fragmentShader,
@@ -30,7 +30,7 @@ export const initSimulatedTorus = (scene, renderer, options) => {
   });
 
   const positions = torusGeometry.attributes.position.array;
-  const particleCount = Math.round(
+  const particleCount = Math.floor(
     torusGeometry.attributes.position.array.length / 3,
   );
   const matrixSize = Math.ceil(Math.sqrt(particleCount));
@@ -71,6 +71,10 @@ export const initSimulatedTorus = (scene, renderer, options) => {
   const particlesCalculatedGeometry = new BufferGeometry();
   particlesCalculatedGeometry.setDrawRange(0, particleCount);
   particlesCalculatedGeometry.setAttribute(
+    "aParticleUV",
+    new BufferAttribute(particlesUVs, 2),
+  );
+  particlesGeometry.setAttribute(
     "aParticleUV",
     new BufferAttribute(particlesUVs, 2),
   );
@@ -119,5 +123,7 @@ export const initSimulatedTorus = (scene, renderer, options) => {
 
     torusMaterial.uniforms.uParticlesTexture.value =
       gpgpuRenderer.getCurrentRenderTarget(particlesVariable).texture;
+
+    torusMaterial.uniforms.needsUpdate = true;
   });
 };
